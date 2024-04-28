@@ -23,28 +23,26 @@ class Player(GameSprite):
         if keys[K_w] and self.rect.y > 5:
             self.rect.y -= self.speed
         elif keys[K_s] and self.rect.y < 395:
-            self.rect.y += self speed
+            self.rect.y += self.speed
     def update_r(self):
         keys = key.get_pressed()
         if keys[K_UP] and self.rect.y > 5:
             self.rect.y -= self.speed
         elif keys[K_DOWN] and self.rect.y < 395:
-            self.rect.y += self speed
+            self.rect.y += self.speed
             
 class Ball(GameSprite):
-    #def __init__(self, player_image, player_x, player_y, speed, wight, height):
-        #super().__init__()
-        self.speed_x = GameSprite.speed
-        self.speed_y = GameSprite.speed
-        #speed_x = self.speed
-        #speed_y = self.speed
+    def __init__(self, player_image, player_x, player_y, player_speed, wight, height):
+        super().__init__(player_image, player_x, player_y, player_speed, wight, height)
+        self.speed_x = player_speed
+        self.speed_y = player_speed
         
     def update(self):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
         if self.rect.y < 5:
             self.speed_y = self.speed_y * -1
-        elif self.rect.y > 495:
+        elif self.rect.y > 450:
             self.speed_y *= -1
             
 #игровая сцена:
@@ -62,27 +60,49 @@ clock = time.Clock()
 FPS = 60
 
 roket1 = Player('roket.png', 20, 200, 4, 50, 150)
-roket2 = Player('roket.png', 20, 200, 4, 50, 150)
+roket2 = Player('roket.png', 530, 200, 4, 50, 150)
 ball = Ball('ball.png', 300, 250, 2, 50, 50)
+
+player_score1 = 0
+player_score2 = 0
+
+font.init()
+font = font.SysFont('Arial', 45)
+#raund_text = font.render('')
+win1 = font.render('PLAYER 1 WIN!!!!', True, (0, 255, 0))
+win2 = font.render('PLAYER 2 WIN!!!!', True, (0, 255, 0))
 
 while game:
     for e in event.get():
         if e.type == QUIT:
             game = False
     if not finish:
+        round_text = font.render('Текущий счет: '+str(player_score1)+':'+str(player_score2), True, (0, 0, 0))
         window.fill(back)
+        window.blit(round_text, (140, 30))
         roket1.reset()
         roket2.reset()
         ball.reset()
         roket1.update_l()
         roket2.update_r()
         ball.update()
-        if sprite.collide_rect(roket, ball) or sprite.collide_rect(ball, roket2):
-            ball.speed *= -1
+        if sprite.collide_rect(roket1, ball) or sprite.collide_rect(ball, roket2):
+            ball.speed_x *= -1
             
         if ball.rect.x > 550:
             print('Проиграл второй игрок')
-        elif ball.rect.x < 10:
-            print('Проиграл первый игрок')
+            player_score2 += 1
+            ball.rect.x = 300
+            ball.rect.y = 250
+            ball.speed_x *= -1
+            ball.speed_y *= -1
+            
+        if player_score1 >= 11:
+            finish = True
+            window.blit(win1, (150, 200))
+        elif player_score2 > 11:
+            finish = True
+            window.blit(win2, (150, 200))
+
     clock.tick(FPS)
     display.update()
